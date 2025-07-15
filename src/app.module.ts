@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './users/users.module';
+import { LoggerMiddleware } from './user-logger/user-logger.middleware';
 
 
 @Module({
@@ -9,4 +10,8 @@ import { UserModule } from './users/users.module';
     UserModule,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('users');
+  }
+}
