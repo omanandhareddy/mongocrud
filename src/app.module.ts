@@ -1,17 +1,25 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './users/users.module';
-import { LoggerMiddleware } from './user-logger/user-logger.middleware';
+import { RateLimitMiddleware } from './api-limit/api-limit.middleware';
+import { ConfigModule } from '@nestjs/config';
 
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb+srv://Somke:dz24NWIBJqi9Qxfu@cluster17.doa7tos.mongodb.net/mydata?retryWrites=true&w=majority&appName=Cluster17'),
+    ConfigModule.forRoot({
+      isGlobal: true, 
+      }),
+      MongooseModule.forRootAsync({
+      useFactory: () => ({
+      uri: process.env.MONGO_URI,
+      }),
+      }),
     UserModule,
   ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('users');
+    consumer.apply(RateLimitMiddleware).forRoutes('users');
   }
 }
